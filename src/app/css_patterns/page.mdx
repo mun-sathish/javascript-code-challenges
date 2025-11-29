@@ -1,0 +1,1248 @@
+# 🎨 CSS Patterns & Techniques for Interviews
+
+> **Master CSS patterns commonly asked in frontend interviews**
+>
+> 10 essential CSS scenarios with complete implementations
+
+---
+
+## Scenario 1: Centering Elements (Multiple Methods)
+
+### Problem
+Center an element both horizontally and vertically in its container.
+
+### Solution 1: Flexbox (Modern & Recommended)
+```html
+<div class="flex-container">
+  <div class="flex-item">Centered Content</div>
+</div>
+```
+
+```css
+.flex-container {
+  display: flex;
+  justify-content: center;  /* Horizontal centering */
+  align-items: center;      /* Vertical centering */
+  height: 100vh;
+  background: #f0f0f0;
+}
+
+.flex-item {
+  padding: 20px;
+  background: #007bff;
+  color: white;
+  border-radius: 8px;
+}
+```
+
+### Solution 2: CSS Grid
+```css
+.grid-container {
+  display: grid;
+  place-items: center;  /* Centers both axes */
+  height: 100vh;
+}
+```
+
+### Solution 3: Absolute Positioning + Transform
+```css
+.absolute-container {
+  position: relative;
+  height: 100vh;
+}
+
+.absolute-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+```
+
+**When to use:**
+- **Flexbox**: Best for single-axis or simple layouts
+- **Grid**: Best for complex layouts
+- **Absolute**: When you can't change display property
+
+---
+
+## Scenario 2: Responsive Grid Layout
+
+### Problem
+Create a responsive grid that adapts without media queries.
+
+```html
+<div class="responsive-grid">
+  <div class="grid-card">Card 1</div>
+  <div class="grid-card">Card 2</div>
+  <div class="grid-card">Card 3</div>
+</div>
+```
+
+```css
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.grid-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.grid-card:hover {
+  transform: translateY(-4px);
+}
+```
+
+**Key:** `auto-fit` collapses empty columns, `auto-fill` keeps them.
+
+---
+
+## Scenario 3: Sticky Header
+
+```html
+<header class="sticky-header">
+  <nav>
+    <div class="logo">Logo</div>
+    <ul class="nav-links">
+      <li><a href="#section1">Section 1</a></li>
+      <li><a href="#section2">Section 2</a></li>
+    </ul>
+  </nav>
+</header>
+```
+
+```css
+html {
+  scroll-behavior: smooth;
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-links a {
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #007bff;
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+```
+
+---
+
+## Scenario 4: Modal with Backdrop
+
+```html
+<div class="modal-overlay">
+  <div class="modal-content">
+    <button class="modal-close">&times;</button>
+    <h2>Modal Title</h2>
+    <p>Modal content here</p>
+  </div>
+</div>
+```
+
+```css
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 9999;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-content {
+  transform: scale(1);
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+```
+
+---
+
+## Scenario 5: Card with Hover Effects
+
+```html
+<div class="card">
+  <div class="card-image">
+    <img src="image.jpg" alt="Card">
+    <div class="card-overlay">
+      <button>View Details</button>
+    </div>
+  </div>
+  <div class="card-body">
+    <h3>Card Title</h3>
+    <p>Description</p>
+  </div>
+</div>
+```
+
+```css
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-image img {
+  width: 100%;
+  transition: transform 0.5s ease;
+}
+
+.card:hover .card-image img {
+  transform: scale(1.1);
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover .card-overlay {
+  opacity: 1;
+}
+```
+
+---
+
+## Scenario 6: Loading Spinners
+
+```html
+<div class="spinner spinner-1"></div>
+<div class="spinner spinner-2"></div>
+<div class="spinner spinner-3"></div>
+```
+
+```css
+/* Rotating Border */
+.spinner-1 {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Pulsing Circle */
+.spinner-2 {
+  width: 50px;
+  height: 50px;
+  background: #007bff;
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Bouncing Dots */
+.spinner-3 {
+  display: flex;
+  gap: 8px;
+}
+
+.spinner-3::before,
+.spinner-3::after {
+  content: '';
+  width: 15px;
+  height: 15px;
+  background: #007bff;
+  border-radius: 50%;
+  animation: bounce 1.4s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+```
+
+---
+
+## Scenario 7: Responsive Navigation
+
+```html
+<nav class="navbar">
+  <div class="nav-brand">Logo</div>
+  <button class="nav-toggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <ul class="nav-menu">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+</nav>
+```
+
+```css
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #333;
+}
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.nav-toggle span {
+  width: 25px;
+  height: 3px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.nav-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.nav-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+.nav-menu {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+
+@media (max-width: 768px) {
+  .nav-toggle {
+    display: flex;
+  }
+  
+  .nav-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 70%;
+    height: 100vh;
+    background: #333;
+    flex-direction: column;
+    padding: 5rem 2rem;
+    transition: right 0.3s ease;
+  }
+  
+  .nav-menu.active {
+    right: 0;
+  }
+}
+```
+
+---
+
+## Scenario 8: Form Validation States
+
+```html
+<div class="form-group">
+  <label>Email</label>
+  <input type="email" class="form-input">
+  <span class="form-message"></span>
+</div>
+```
+
+```css
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.form-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-group.valid .form-input {
+  border-color: #28a745;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2328a745'%3E%3Cpath d='M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+}
+
+.form-group.invalid .form-input {
+  border-color: #dc3545;
+}
+
+.form-group.valid .form-message {
+  color: #28a745;
+}
+
+.form-group.invalid .form-message {
+  color: #dc3545;
+}
+```
+
+---
+
+## Scenario 9: Dark Mode with CSS Variables
+
+```html
+<button id="themeToggle">Toggle Theme</button>
+<div class="content">Content here</div>
+```
+
+```css
+:root {
+  --bg-primary: #ffffff;
+  --text-primary: #212529;
+  --accent: #007bff;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --text-primary: #ffffff;
+  --accent: #4dabf7;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.content {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+```
+
+```javascript
+const toggle = document.getElementById('themeToggle');
+const theme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', theme);
+
+toggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  const newTheme = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+});
+```
+
+---
+
+## Scenario 10: Skeleton Loading
+
+```html
+<div class="skeleton-card">
+  <div class="skeleton skeleton-image"></div>
+  <div class="skeleton skeleton-title"></div>
+  <div class="skeleton skeleton-text"></div>
+</div>
+```
+
+```css
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s ease-in-out infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-image {
+  width: 100%;
+  height: 200px;
+  border-radius: 8px 8px 0 0;
+}
+
+.skeleton-title {
+  height: 24px;
+  margin: 1rem;
+  border-radius: 4px;
+}
+
+.skeleton-text {
+  height: 16px;
+
+---
+
+## 📐 CSS Flexbox Complete Cheatsheet
+
+### Container Properties
+
+#### display: flex
+```css
+.container {
+  display: flex;        /* Block-level flex container */
+  display: inline-flex; /* Inline-level flex container */
+}
+```
+
+#### flex-direction
+```css
+.container {
+  flex-direction: row;            /* Default: left to right */
+  flex-direction: row-reverse;    /* Right to left */
+  flex-direction: column;         /* Top to bottom */
+  flex-direction: column-reverse; /* Bottom to top */
+}
+```
+
+#### flex-wrap
+```css
+.container {
+  flex-wrap: nowrap;      /* Default: single line */
+  flex-wrap: wrap;        /* Multi-line, top to bottom */
+  flex-wrap: wrap-reverse; /* Multi-line, bottom to top */
+}
+```
+
+#### flex-flow (shorthand)
+```css
+.container {
+  flex-flow: row wrap;           /* direction + wrap */
+  flex-flow: column nowrap;
+  flex-flow: row-reverse wrap;
+}
+```
+
+#### justify-content (Main Axis)
+```css
+.container {
+  justify-content: flex-start;    /* Default: start of container */
+  justify-content: flex-end;      /* End of container */
+  justify-content: center;        /* Center of container */
+  justify-content: space-between; /* Equal space between items */
+  justify-content: space-around;  /* Equal space around items */
+  justify-content: space-evenly;  /* Equal space between and around */
+}
+```
+
+#### align-items (Cross Axis)
+```css
+.container {
+  align-items: stretch;     /* Default: fill container height */
+  align-items: flex-start;  /* Start of cross axis */
+  align-items: flex-end;    /* End of cross axis */
+  align-items: center;      /* Center of cross axis */
+  align-items: baseline;    /* Align baselines */
+}
+```
+
+#### align-content (Multi-line)
+```css
+.container {
+  align-content: stretch;       /* Default: lines stretch */
+  align-content: flex-start;    /* Lines at start */
+  align-content: flex-end;      /* Lines at end */
+  align-content: center;        /* Lines at center */
+  align-content: space-between; /* Equal space between lines */
+  align-content: space-around;  /* Equal space around lines */
+  align-content: space-evenly;  /* Equal space everywhere */
+}
+```
+
+#### gap
+```css
+.container {
+  gap: 1rem;              /* Both row and column gap */
+  gap: 1rem 2rem;         /* row-gap column-gap */
+  row-gap: 1rem;          /* Gap between rows */
+  column-gap: 2rem;       /* Gap between columns */
+}
+```
+
+### Item Properties
+
+#### order
+```css
+.item {
+  order: 0;    /* Default: source order */
+  order: 1;    /* Appears later */
+  order: -1;   /* Appears earlier */
+}
+```
+
+#### flex-grow
+```css
+.item {
+  flex-grow: 0;  /* Default: don't grow */
+  flex-grow: 1;  /* Grow to fill space */
+  flex-grow: 2;  /* Grow twice as much */
+}
+```
+
+#### flex-shrink
+```css
+.item {
+  flex-shrink: 1;  /* Default: can shrink */
+  flex-shrink: 0;  /* Don't shrink */
+  flex-shrink: 2;  /* Shrink twice as much */
+}
+```
+
+#### flex-basis
+```css
+.item {
+  flex-basis: auto;    /* Default: based on content */
+  flex-basis: 200px;   /* Fixed width/height */
+  flex-basis: 50%;     /* Percentage of container */
+  flex-basis: 0;       /* Ignore content size */
+}
+```
+
+#### flex (shorthand)
+```css
+.item {
+  flex: 1;              /* flex-grow: 1, flex-shrink: 1, flex-basis: 0% */
+  flex: 0 1 auto;       /* Default: don't grow, can shrink, auto basis */
+  flex: 1 0 200px;      /* grow, don't shrink, 200px basis */
+  flex: 2;              /* Grow twice as much as flex: 1 */
+}
+```
+
+#### align-self
+```css
+.item {
+  align-self: auto;       /* Default: inherit from container */
+  align-self: flex-start; /* Override container's align-items */
+  align-self: flex-end;
+  align-self: center;
+  align-self: baseline;
+  align-self: stretch;
+}
+```
+
+### Common Flexbox Patterns
+
+#### 1. Perfect Centering
+```css
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+```
+
+#### 2. Space Between Header
+```css
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+```
+
+#### 3. Equal Width Columns
+```css
+.container {
+  display: flex;
+}
+.item {
+  flex: 1; /* All items equal width */
+}
+```
+
+#### 4. Sidebar Layout
+```css
+.container {
+  display: flex;
+}
+.sidebar {
+  flex: 0 0 250px; /* Fixed 250px width */
+}
+.main {
+  flex: 1; /* Takes remaining space */
+}
+```
+
+#### 5. Card Grid
+```css
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.card {
+  flex: 1 1 300px; /* Grow, shrink, min 300px */
+}
+```
+
+#### 6. Sticky Footer
+```css
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+main {
+  flex: 1; /* Takes all available space */
+}
+```
+
+---
+
+## 🎯 CSS Grid Complete Cheatsheet
+
+### Container Properties
+
+#### display: grid
+```css
+.container {
+  display: grid;        /* Block-level grid container */
+  display: inline-grid; /* Inline-level grid container */
+}
+```
+
+#### grid-template-columns
+```css
+.container {
+  grid-template-columns: 200px 200px 200px;  /* 3 fixed columns */
+  grid-template-columns: 1fr 1fr 1fr;        /* 3 equal columns */
+  grid-template-columns: 1fr 2fr 1fr;        /* Middle column twice as wide */
+  grid-template-columns: 200px 1fr 200px;    /* Fixed sides, flexible middle */
+  grid-template-columns: repeat(3, 1fr);     /* Repeat 3 times */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responsive */
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsive */
+}
+```
+
+#### grid-template-rows
+```css
+.container {
+  grid-template-rows: 100px 200px 100px;  /* 3 fixed rows */
+  grid-template-rows: 1fr 2fr 1fr;        /* Proportional rows */
+  grid-template-rows: repeat(3, 100px);   /* 3 rows of 100px */
+  grid-template-rows: auto 1fr auto;      /* Header, content, footer */
+}
+```
+
+#### grid-template-areas
+```css
+.container {
+  grid-template-areas:
+    "header header header"
+    "sidebar main main"
+    "footer footer footer";
+}
+
+.header  { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+.main    { grid-area: main; }
+.footer  { grid-area: footer; }
+```
+
+#### gap
+```css
+.container {
+  gap: 1rem;              /* Both row and column gap */
+  gap: 1rem 2rem;         /* row-gap column-gap */
+  row-gap: 1rem;          /* Gap between rows */
+  column-gap: 2rem;       /* Gap between columns */
+}
+```
+
+#### justify-items (Horizontal alignment of items)
+```css
+.container {
+  justify-items: stretch;  /* Default: fill cell width */
+  justify-items: start;    /* Align to start of cell */
+  justify-items: end;      /* Align to end of cell */
+  justify-items: center;   /* Center in cell */
+}
+```
+
+#### align-items (Vertical alignment of items)
+```css
+.container {
+  align-items: stretch;  /* Default: fill cell height */
+  align-items: start;    /* Align to top of cell */
+  align-items: end;      /* Align to bottom of cell */
+  align-items: center;   /* Center in cell */
+}
+```
+
+#### place-items (shorthand)
+```css
+.container {
+  place-items: center;        /* Both axes centered */
+  place-items: start end;     /* align-items justify-items */
+}
+```
+
+#### justify-content (Horizontal alignment of grid)
+```css
+.container {
+  justify-content: start;         /* Align grid to start */
+  justify-content: end;           /* Align grid to end */
+  justify-content: center;        /* Center grid */
+  justify-content: stretch;       /* Default: fill container */
+  justify-content: space-between; /* Space between columns */
+  justify-content: space-around;  /* Space around columns */
+  justify-content: space-evenly;  /* Equal space everywhere */
+}
+```
+
+#### align-content (Vertical alignment of grid)
+```css
+.container {
+  align-content: start;         /* Align grid to top */
+  align-content: end;           /* Align grid to bottom */
+  align-content: center;        /* Center grid vertically */
+  align-content: stretch;       /* Default: fill container */
+  align-content: space-between; /* Space between rows */
+  align-content: space-around;  /* Space around rows */
+  align-content: space-evenly;  /* Equal space everywhere */
+}
+```
+
+#### place-content (shorthand)
+```css
+.container {
+  place-content: center;      /* Both axes centered */
+  place-content: start end;   /* align-content justify-content */
+}
+```
+
+#### grid-auto-columns
+```css
+.container {
+  grid-auto-columns: 100px;   /* Implicit columns 100px */
+  grid-auto-columns: 1fr;     /* Implicit columns equal width */
+  grid-auto-columns: minmax(100px, 1fr); /* Min 100px, max 1fr */
+}
+```
+
+#### grid-auto-rows
+```css
+.container {
+  grid-auto-rows: 100px;      /* Implicit rows 100px */
+  grid-auto-rows: minmax(100px, auto); /* Min 100px, grow as needed */
+}
+```
+
+#### grid-auto-flow
+```css
+.container {
+  grid-auto-flow: row;        /* Default: fill rows first */
+  grid-auto-flow: column;     /* Fill columns first */
+  grid-auto-flow: dense;      /* Fill holes in grid */
+  grid-auto-flow: row dense;  /* Row-first, fill holes */
+}
+```
+
+### Item Properties
+
+#### grid-column
+```css
+.item {
+  grid-column: 1;              /* Start at column 1 */
+  grid-column: 1 / 3;          /* Span from column 1 to 3 */
+  grid-column: 1 / span 2;     /* Start at 1, span 2 columns */
+  grid-column: span 2;         /* Span 2 columns from auto position */
+  grid-column: 1 / -1;         /* Start at 1, end at last column */
+}
+
+/* Longhand */
+.item {
+  grid-column-start: 1;
+  grid-column-end: 3;
+}
+```
+
+#### grid-row
+```css
+.item {
+  grid-row: 1;              /* Start at row 1 */
+  grid-row: 1 / 3;          /* Span from row 1 to 3 */
+  grid-row: 1 / span 2;     /* Start at 1, span 2 rows */
+  grid-row: span 2;         /* Span 2 rows from auto position */
+  grid-row: 1 / -1;         /* Start at 1, end at last row */
+}
+
+/* Longhand */
+.item {
+  grid-row-start: 1;
+  grid-row-end: 3;
+}
+```
+
+#### grid-area
+```css
+.item {
+  grid-area: header;           /* Use named area */
+  grid-area: 1 / 1 / 3 / 3;    /* row-start / col-start / row-end / col-end */
+}
+```
+
+#### justify-self (Horizontal alignment of single item)
+```css
+.item {
+  justify-self: stretch;  /* Default: fill cell width */
+  justify-self: start;    /* Align to start of cell */
+  justify-self: end;      /* Align to end of cell */
+  justify-self: center;   /* Center in cell */
+}
+```
+
+#### align-self (Vertical alignment of single item)
+```css
+.item {
+  align-self: stretch;  /* Default: fill cell height */
+  align-self: start;    /* Align to top of cell */
+  align-self: end;      /* Align to bottom of cell */
+  align-self: center;   /* Center in cell */
+}
+```
+
+#### place-self (shorthand)
+```css
+.item {
+  place-self: center;      /* Both axes centered */
+  place-self: start end;   /* align-self justify-self */
+}
+```
+
+### Grid Functions
+
+#### repeat()
+```css
+.container {
+  grid-template-columns: repeat(3, 1fr);              /* 3 equal columns */
+  grid-template-columns: repeat(3, 100px);            /* 3 fixed columns */
+  grid-template-columns: repeat(auto-fit, 200px);     /* Auto columns */
+  grid-template-columns: repeat(auto-fill, 200px);    /* Auto columns */
+  grid-template-columns: repeat(3, 1fr 2fr);          /* Pattern: 1fr 2fr 1fr 2fr 1fr 2fr */
+}
+```
+
+#### minmax()
+```css
+.container {
+  grid-template-columns: minmax(100px, 1fr);          /* Min 100px, max 1fr */
+  grid-template-columns: repeat(3, minmax(200px, 1fr)); /* Responsive columns */
+  grid-template-rows: minmax(100px, auto);            /* Min 100px, grow as needed */
+}
+```
+
+#### fit-content()
+```css
+.container {
+  grid-template-columns: fit-content(200px) 1fr;  /* Max 200px or content size */
+}
+```
+
+#### min-content & max-content
+```css
+.container {
+  grid-template-columns: min-content 1fr;  /* Smallest content size */
+  grid-template-columns: max-content 1fr;  /* Largest content size */
+}
+```
+
+### Common Grid Patterns
+
+#### 1. Basic 3-Column Layout
+```css
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+```
+
+#### 2. Responsive Grid (No Media Queries)
+```css
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+```
+
+#### 3. Holy Grail Layout
+```css
+.container {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "sidebar main aside"
+    "footer footer footer";
+  grid-template-columns: 200px 1fr 200px;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  gap: 1rem;
+}
+```
+
+#### 4. Card Grid with Different Sizes
+```css
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-auto-rows: 200px;
+  gap: 1rem;
+}
+
+.card-large {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+```
+
+#### 5. Masonry-like Layout
+```css
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-auto-rows: 10px;
+  gap: 1rem;
+}
+
+.item {
+  grid-row: span var(--row-span); /* Dynamic row span */
+}
+```
+
+#### 6. Dashboard Layout
+```css
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+
+.widget-small {
+  grid-column: span 3;
+}
+
+.widget-medium {
+  grid-column: span 6;
+}
+
+.widget-large {
+  grid-column: span 12;
+}
+```
+
+#### 7. Centered Content
+```css
+.container {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
+```
+
+#### 8. Sidebar Layout
+```css
+.layout {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 2rem;
+  min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+---
+
+## 🆚 Flexbox vs Grid: When to Use
+
+### Use Flexbox When:
+- ✅ One-dimensional layouts (row OR column)
+- ✅ Content-driven sizing
+- ✅ Navigation bars
+- ✅ Centering items
+- ✅ Distributing space between items
+- ✅ Aligning items in a single direction
+
+### Use Grid When:
+- ✅ Two-dimensional layouts (rows AND columns)
+- ✅ Layout-driven sizing
+- ✅ Complex page layouts
+- ✅ Overlapping elements
+- ✅ Precise placement control
+- ✅ Responsive grids without media queries
+
+### Can Use Both:
+```css
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+```
+
+---
+
+## 💡 Pro Tips
+
+### Flexbox Tips:
+1. Use `flex: 1` for equal-width items
+2. Use `gap` instead of margins for spacing
+3. `flex-wrap: wrap` for responsive layouts
+4. Combine `justify-content` and `align-items` for centering
+5. Use `order` sparingly (affects accessibility)
+
+### Grid Tips:
+1. Use `fr` units for flexible sizing
+2. `auto-fit` collapses empty columns, `auto-fill` keeps them
+3. Use `minmax()` for responsive columns
+4. Named areas make complex layouts readable
+5. `grid-column: 1 / -1` spans full width
+6. Use `place-items: center` for quick centering
+7. Combine with Flexbox for nested layouts
+
+### Common Gotchas:
+- **Flexbox**: `flex: 1` = `flex: 1 1 0%` (not `auto`)
+- **Grid**: `fr` units don't work with `minmax()` minimum
+- **Both**: `gap` doesn't work in older browsers (use fallbacks)
+- **Flexbox**: `align-content` only works with `flex-wrap: wrap`
+- **Grid**: Implicit grid tracks use `grid-auto-rows/columns`
+
+  margin: 0.5rem 1rem;
+  border-radius: 4px;
+}
+```
+
+---
+
+## 🎯 Key CSS Concepts Covered
+
+1. **Flexbox & Grid**: Modern layout techniques
+2. **Positioning**: Sticky, absolute, relative
+3. **Transitions & Animations**: Smooth interactions
+4. **Pseudo-elements**: ::before, ::after for effects
+5. **CSS Variables**: Dynamic theming
+6. **Media Queries**: Responsive design
+7. **Transform**: Scale, translate, rotate
+8. **Box Shadow**: Depth and elevation
+9. **Backdrop Filter**: Modern blur effects
+10. **Data Attributes**: State management in CSS
+
+## 💡 Interview Tips
+
+- **Explain your choices**: Why flexbox over grid?
+- **Consider accessibility**: Focus states, ARIA labels
+- **Think responsive**: Mobile-first approach
+- **Performance**: Use transform over position changes
+- **Browser support**: Know fallbacks for modern features

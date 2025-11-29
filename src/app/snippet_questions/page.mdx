@@ -1,0 +1,1839 @@
+# 🎯 100 Advanced JavaScript Snippets for Karat Interview
+
+> **For Atlassian Karat Interview Preparation**
+> 
+> These are **advanced and tricky** JavaScript questions focusing on edge cases, modern features, and common interview patterns. Each question shows a code snippet - predict the output!
+
+---
+
+## Part 1: Scope, Hoisting & Closures (Q1-25)
+
+### Q1: Temporal Dead Zone with Let
+```javascript
+function test() {
+  console.log(typeof x);
+  let x = 10;
+}
+test();
+```
+**Output:** `ReferenceError: Cannot access 'x' before initialization`
+
+**Explanation:** Unlike `var`, `let` creates a temporal dead zone from the start of the block until initialization.
+
+---
+
+### Q2: Closure with Loop and setTimeout
+```javascript
+for (var i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i), 100);
+}
+```
+**Output:** 
+```
+3
+3
+3
+```
+**Explanation:** `var` is function-scoped. All callbacks share the same `i`, which is 3 after loop completes.
+
+---
+
+### Q3: IIFE and Closure
+```javascript
+const result = (function() {
+  let count = 0;
+  return function() {
+    return ++count;
+  };
+})();
+console.log(result());
+console.log(result());
+console.log(result());
+```
+**Output:**
+```
+1
+2
+3
+```
+**Explanation:** IIFE creates a closure preserving `count` across multiple calls.
+
+---
+
+### Q4: Block Scope Shadowing
+```javascript
+let x = 1;
+{
+  let x = 2;
+  {
+    let x = 3;
+    console.log(x);
+  }
+  console.log(x);
+}
+console.log(x);
+```
+**Output:**
+```
+3
+2
+1
+```
+**Explanation:** Each block creates a new scope, shadowing outer variables.
+
+---
+
+### Q5: Hoisting with Function Expressions
+```javascript
+console.log(typeof foo);
+console.log(typeof bar);
+var foo = function() {};
+function bar() {}
+```
+**Output:**
+```
+undefined
+function
+```
+**Explanation:** Function declarations are fully hoisted; function expressions are not.
+
+---
+
+### Q6: Const with Arrays
+```javascript
+const arr = [1, 2, 3];
+arr.push(4);
+arr = [5, 6, 7];
+console.log(arr);
+```
+**Output:** `TypeError: Assignment to constant variable`
+
+**Explanation:** `const` prevents reassignment but allows mutation of objects/arrays.
+
+---
+
+### Q7: Closure Memory
+```javascript
+function outer() {
+  const data = 'secret';
+  return {
+    getData: () => data,
+    setData: (val) => { data = val; }
+  };
+}
+const obj = outer();
+console.log(obj.getData());
+obj.setData('new');
+```
+**Output:**
+```
+secret
+TypeError: Assignment to constant variable
+```
+**Explanation:** Can't reassign `const` variable even through closure.
+
+---
+
+### Q8: Multiple Var Declarations
+```javascript
+var a = b = c = 5;
+console.log(typeof a, typeof b, typeof c);
+(function() {
+  'use strict';
+  var a = b = c = 10;
+})();
+```
+**Output:** `ReferenceError: b is not defined`
+
+**Explanation:** In strict mode, `b = c = 10` creates implicit globals which is forbidden.
+
+---
+
+### Q9: Nested Closures
+```javascript
+function createCounter() {
+  let count = 0;
+  return {
+    increment: () => ++count,
+    decrement: () => --count,
+    getCount: () => count
+  };
+}
+const counter1 = createCounter();
+const counter2 = createCounter();
+counter1.increment();
+counter1.increment();
+counter2.increment();
+console.log(counter1.getCount(), counter2.getCount());
+```
+**Output:** `2 1`
+
+**Explanation:** Each counter has its own closure over a separate `count` variable.
+
+---
+
+### Q10: Let in Loop
+```javascript
+const funcs = [];
+for (let i = 0; i < 3; i++) {
+  funcs.push(() => i);
+}
+console.log(funcs.map(f => f()));
+```
+**Output:** `[0, 1, 2]`
+
+**Explanation:** `let` creates a new binding for each iteration.
+
+---
+
+### Q11: Hoisting Order
+```javascript
+var foo = 1;
+function bar() {
+  if (!foo) {
+    var foo = 10;
+  }
+  console.log(foo);
+}
+bar();
+```
+**Output:** `10`
+
+**Explanation:** `var foo` is hoisted to function scope, making outer `foo` inaccessible.
+
+---
+
+### Q12: Arrow Function and This
+```javascript
+const obj = {
+  value: 42,
+  getValue: () => this.value,
+  getValueRegular: function() {
+    return this.value;
+  }
+};
+console.log(obj.getValue());
+console.log(obj.getValueRegular());
+```
+**Output:**
+```
+undefined
+42
+```
+**Explanation:** Arrow functions don't have their own `this`; they inherit from enclosing scope.
+
+---
+
+### Q13: Closure with Parameters
+```javascript
+function multiplier(factor) {
+  return number => number * factor;
+}
+const double = multiplier(2);
+const triple = multiplier(3);
+console.log(double(5));
+console.log(triple(5));
+```
+**Output:**
+```
+10
+15
+```
+**Explanation:** Each returned function closes over its own `factor` parameter.
+
+---
+
+### Q14: Block Scope and Var
+```javascript
+if (true) {
+  var x = 5;
+}
+console.log(x);
+
+if (true) {
+  let y = 10;
+}
+console.log(y);
+```
+**Output:**
+```
+5
+ReferenceError: y is not defined
+```
+**Explanation:** `var` ignores block scope; `let` respects it.
+
+---
+
+### Q15: Function Declaration vs Expression
+```javascript
+foo();
+bar();
+
+function foo() {
+  console.log('foo');
+}
+
+var bar = function() {
+  console.log('bar');
+};
+```
+**Output:**
+```
+foo
+TypeError: bar is not a function
+```
+**Explanation:** Function declarations are hoisted completely; expressions are not.
+
+---
+
+### Q16: Closure Loop Fix
+```javascript
+for (var i = 0; i < 3; i++) {
+  (function(j) {
+    setTimeout(() => console.log(j), 100);
+  })(i);
+}
+```
+**Output:**
+```
+0
+1
+2
+```
+**Explanation:** IIFE creates new scope for each iteration, capturing current `i` value.
+
+---
+
+### Q17: Const Object Mutation
+```javascript
+const obj = { a: 1 };
+obj.a = 2;
+obj.b = 3;
+console.log(obj);
+Object.freeze(obj);
+obj.a = 4;
+console.log(obj);
+```
+**Output:**
+```
+{ a: 2, b: 3 }
+{ a: 2, b: 3 }
+```
+**Explanation:** `const` allows mutation; `Object.freeze()` prevents it (silently in non-strict mode).
+
+---
+
+### Q18: Nested Function Scope
+```javascript
+function outer() {
+  var x = 10;
+  function inner() {
+    var x = 20;
+    console.log(x);
+  }
+  inner();
+  console.log(x);
+}
+outer();
+```
+**Output:**
+```
+20
+10
+```
+**Explanation:** Inner function's `x` shadows outer's `x`.
+
+---
+
+### Q19: Let Redeclaration
+```javascript
+let x = 1;
+{
+  let x = 2;
+  console.log(x);
+}
+console.log(x);
+let x = 3;
+```
+**Output:**
+```
+2
+1
+SyntaxError: Identifier 'x' has already been declared
+```
+**Explanation:** Can't redeclare `let` in same scope.
+
+---
+
+### Q20: Closure with Async
+```javascript
+function createFunctions() {
+  const funcs = [];
+  for (var i = 0; i < 3; i++) {
+    funcs.push(async () => i);
+  }
+  return funcs;
+}
+const funcs = createFunctions();
+Promise.all(funcs.map(f => f())).then(console.log);
+```
+**Output:** `[3, 3, 3]`
+
+**Explanation:** `var` is function-scoped; all async functions share same `i`.
+
+---
+
+### Q21: Destructuring Default Values
+```javascript
+const { a = 10, b = 20 } = { a: 5 };
+console.log(a, b);
+```
+**Output:** `5 20`
+
+**Explanation:** Destructuring uses default values when property is undefined.
+
+---
+
+### Q22: Rest in Destructuring
+```javascript
+const { a, b, ...rest } = { a: 1, b: 2, c: 3, d: 4 };
+console.log(rest);
+```
+**Output:** `{ c: 3, d: 4 }`
+
+**Explanation:** Rest operator collects remaining properties.
+
+---
+
+### Q23: Nested Destructuring
+```javascript
+const obj = { a: { b: { c: 42 } } };
+const { a: { b: { c } } } = obj;
+console.log(c);
+console.log(a);
+```
+**Output:**
+```
+42
+ReferenceError: a is not defined
+```
+**Explanation:** Nested destructuring only creates variable for innermost value.
+
+---
+
+### Q24: Function Parameter Scope
+```javascript
+function test(x = y, y = 2) {
+  console.log(x, y);
+}
+test();
+```
+**Output:** `ReferenceError: Cannot access 'y' before initialization`
+
+**Explanation:** Parameters evaluated left-to-right; `y` not yet initialized when `x` evaluated.
+
+---
+
+### Q25: Closure in Class
+```javascript
+class Counter {
+  constructor() {
+    let count = 0;
+    this.increment = () => ++count;
+    this.getCount = () => count;
+  }
+}
+const c1 = new Counter();
+const c2 = new Counter();
+c1.increment();
+console.log(c1.getCount(), c2.getCount());
+```
+**Output:** `1 0`
+
+**Explanation:** Each instance has its own closure over separate `count` variable.
+
+---
+
+## 📚 Continue to Next Parts
+
+This page contains Q1-25. The remaining 75 questions cover:
+- **Part 2 (Q26-50)**: Objects, Prototypes, This binding
+- **Part 3 (Q51-75)**: Arrays, Iteration, Modern methods
+- **Part 4 (Q76-100)**: Async/Await, Promises, Event Loop, Advanced patterns
+
+Check the existing **"Basic JS questions"** section for more fundamental concepts and the **"Concepts"** section for detailed explanations of each topic.
+
+---
+
+## 🎯 Key Takeaways from Part 1
+
+1. **Temporal Dead Zone**: `let`/`const` can't be accessed before declaration
+2. **Closures**: Inner functions retain access to outer scope variables
+3. **var vs let/const**: `var` is function-scoped, `let`/`const` are block-scoped
+4. **Arrow Functions**: Don't have their own `this`, inherit from enclosing scope
+5. **Hoisting**: Function declarations fully hoisted, expressions partially
+6. **IIFE**: Immediately Invoked Function Expressions create new scope
+7. **Const**: Prevents reassignment but allows object/array mutation
+8. **Destructuring**: Can have defaults, rest operators, and nested patterns
+
+
+---
+
+## Part 2: Objects, Prototypes & This (Q26-50)
+
+### Q26: Object Property Shorthand
+```javascript
+const name = 'Alice';
+const age = 30;
+const person = { name, age };
+console.log(person);
+```
+**Output:** `{ name: 'Alice', age: 30 }`
+
+**Explanation:** ES6 property shorthand when variable name matches property name.
+
+---
+
+### Q27: Computed Property Names
+```javascript
+const key = 'dynamic';
+const obj = {
+  [key]: 'value',
+  [`${key}2`]: 'value2'
+};
+console.log(obj);
+```
+**Output:** `{ dynamic: 'value', dynamic2: 'value2' }`
+
+**Explanation:** Square brackets allow computed property names at object creation.
+
+---
+
+### Q28: Object.assign() Mutation
+```javascript
+const target = { a: 1, b: 2 };
+const source = { b: 3, c: 4 };
+const result = Object.assign(target, source);
+console.log(target === result);
+console.log(target);
+```
+**Output:**
+```
+true
+{ a: 1, b: 3, c: 4 }
+```
+**Explanation:** `Object.assign()` mutates and returns target object.
+
+---
+
+### Q29: Prototype Chain Lookup
+```javascript
+function Person(name) {
+  this.name = name;
+}
+Person.prototype.greet = function() {
+  return `Hello, ${this.name}`;
+};
+const person = new Person('Bob');
+console.log(person.greet());
+console.log(person.hasOwnProperty('name'));
+console.log(person.hasOwnProperty('greet'));
+```
+**Output:**
+```
+Hello, Bob
+true
+false
+```
+**Explanation:** `name` is own property; `greet` is on prototype.
+
+---
+
+### Q30: Object Spread Shallow Copy
+```javascript
+const original = { a: 1, b: { c: 2 } };
+const copy = { ...original };
+copy.b.c = 3;
+console.log(original.b.c);
+```
+**Output:** `3`
+
+**Explanation:** Spread creates shallow copy; nested objects still share references.
+
+---
+
+### Q31: This in Arrow vs Regular
+```javascript
+const obj = {
+  value: 42,
+  regular: function() {
+    setTimeout(function() {
+      console.log(this.value);
+    }, 0);
+  },
+  arrow: function() {
+    setTimeout(() => {
+      console.log(this.value);
+    }, 0);
+  }
+};
+obj.regular();
+obj.arrow();
+```
+**Output:**
+```
+undefined
+42
+```
+**Explanation:** Regular function loses context; arrow function inherits it.
+
+---
+
+### Q32: Constructor Return Object
+```javascript
+function MyClass() {
+  this.value = 42;
+  return { value: 100 };
+}
+const instance = new MyClass();
+console.log(instance.value);
+```
+**Output:** `100`
+
+**Explanation:** Constructor returning object overrides default `this` return.
+
+---
+
+### Q33: Object.freeze() Nested
+```javascript
+const obj = Object.freeze({ a: 1, b: { c: 2 } });
+obj.a = 10;
+obj.b.c = 20;
+console.log(obj);
+```
+**Output:** `{ a: 1, b: { c: 20 } }`
+
+**Explanation:** `freeze()` is shallow; nested objects can still be modified.
+
+---
+
+### Q34: Symbol as Property Key
+```javascript
+const sym = Symbol('key');
+const obj = { [sym]: 'value', regular: 'prop' };
+console.log(Object.keys(obj));
+console.log(Object.getOwnPropertySymbols(obj));
+console.log(obj[sym]);
+```
+**Output:**
+```
+['regular']
+[Symbol(key)]
+value
+```
+**Explanation:** Symbol properties hidden from `Object.keys()` but accessible.
+
+---
+
+### Q35: Class Static Methods
+```javascript
+class MathUtils {
+  static add(a, b) {
+    return a + b;
+  }
+}
+const utils = new MathUtils();
+console.log(MathUtils.add(2, 3));
+console.log(utils.add(2, 3));
+```
+**Output:**
+```
+5
+TypeError: utils.add is not a function
+```
+**Explanation:** Static methods called on class, not instances.
+
+---
+
+### Q36: Getters and Setters
+```javascript
+const obj = {
+  _value: 0,
+  get value() {
+    return this._value;
+  },
+  set value(val) {
+    this._value = val * 2;
+  }
+};
+obj.value = 5;
+console.log(obj.value);
+console.log(obj._value);
+```
+**Output:**
+```
+10
+10
+```
+**Explanation:** Setter doubles value before storing; getter returns stored value.
+
+---
+
+### Q37: Object Destructuring with Defaults
+```javascript
+const { a = 10, b = 20, c = 30 } = { a: 5, b: null };
+console.log(a, b, c);
+```
+**Output:** `5 null 30`
+
+**Explanation:** Defaults only apply when value is `undefined`, not `null`.
+
+---
+
+### Q38: Method Shorthand vs Arrow
+```javascript
+const obj = {
+  name: 'Test',
+  method1() {
+    console.log(this.name);
+  },
+  method2: () => {
+    console.log(this.name);
+  }
+};
+obj.method1();
+obj.method2();
+```
+**Output:**
+```
+Test
+undefined
+```
+**Explanation:** Method shorthand has proper `this`; arrow function doesn't.
+
+---
+
+### Q39: Object.create() with Null
+```javascript
+const obj = Object.create(null);
+obj.name = 'Test';
+console.log(obj.toString);
+console.log(obj.name);
+```
+**Output:**
+```
+undefined
+Test
+```
+**Explanation:** Object with null prototype has no inherited methods.
+
+---
+
+### Q40: Private Class Fields
+```javascript
+class Counter {
+  #count = 0;
+  increment() {
+    this.#count++;
+  }
+  getCount() {
+    return this.#count;
+  }
+}
+const c = new Counter();
+c.increment();
+console.log(c.getCount());
+console.log(c.#count);
+```
+**Output:**
+```
+1
+SyntaxError: Private field '#count' must be declared in an enclosing class
+```
+**Explanation:** Private fields cannot be accessed outside class.
+
+---
+
+### Q41: Proxy Get Trap
+```javascript
+const target = { value: 42 };
+const proxy = new Proxy(target, {
+  get(obj, prop) {
+    return prop in obj ? obj[prop] * 2 : 'Not found';
+  }
+});
+console.log(proxy.value);
+console.log(target.value);
+console.log(proxy.missing);
+```
+**Output:**
+```
+84
+42
+Not found
+```
+**Explanation:** Proxy intercepts property access; original unchanged.
+
+---
+
+### Q42: Object Property Order
+```javascript
+const obj = { 2: 'two', 1: 'one', a: 'letter' };
+console.log(Object.keys(obj));
+```
+**Output:** `['1', '2', 'a']`
+
+**Explanation:** Numeric keys sorted first, then insertion order for strings.
+
+---
+
+### Q43: Optional Chaining
+```javascript
+const obj = { a: { b: { c: 42 } } };
+console.log(obj?.a?.b?.c);
+console.log(obj?.x?.y?.z);
+console.log(obj.x?.y?.z);
+```
+**Output:**
+```
+42
+undefined
+TypeError: Cannot read properties of undefined
+```
+**Explanation:** Optional chaining stops at first nullish; last one fails before `?.`.
+
+---
+
+### Q44: Nullish Coalescing
+```javascript
+console.log(null ?? 'default');
+console.log(undefined ?? 'default');
+console.log(0 ?? 'default');
+console.log('' ?? 'default');
+console.log(false ?? 'default');
+```
+**Output:**
+```
+default
+default
+0
+
+false
+```
+**Explanation:** `??` only checks for null/undefined, not other falsy values.
+
+---
+
+### Q45: Object Seal vs Freeze
+```javascript
+const sealed = Object.seal({ a: 1 });
+sealed.a = 2;
+sealed.b = 3;
+delete sealed.a;
+console.log(sealed);
+
+const frozen = Object.freeze({ a: 1 });
+frozen.a = 2;
+console.log(frozen);
+```
+**Output:**
+```
+{ a: 2 }
+{ a: 1 }
+```
+**Explanation:** Seal allows updates but not additions/deletions; freeze prevents all changes.
+
+---
+
+### Q46: Class Inheritance Super
+```javascript
+class Animal {
+  constructor(name) {
+    this.name = name;
+  }
+}
+class Dog extends Animal {
+  constructor(name, breed) {
+    this.breed = breed;
+    super(name);
+  }
+}
+const dog = new Dog('Rex', 'Labrador');
+```
+**Output:** `ReferenceError: Must call super constructor before accessing 'this'`
+
+**Explanation:** Must call `super()` before using `this` in derived class constructor.
+
+---
+
+### Q47: Object Rest in Destructuring
+```javascript
+const obj = { a: 1, b: 2, c: 3, d: 4 };
+const { a, b, ...rest } = obj;
+rest.a = 10;
+console.log(obj.a);
+console.log(rest.a);
+```
+**Output:**
+```
+1
+10
+```
+**Explanation:** Rest creates shallow copy; modifying doesn't affect original.
+
+---
+
+### Q48: WeakMap Garbage Collection
+```javascript
+let obj = { name: 'Test' };
+const weakMap = new WeakMap();
+weakMap.set(obj, 'value');
+console.log(weakMap.get(obj));
+obj = null;
+// obj can now be garbage collected
+```
+**Output:** `value`
+
+**Explanation:** WeakMap allows garbage collection of keys when no other references exist.
+
+---
+
+### Q49: Object Property Descriptor
+```javascript
+const obj = {};
+Object.defineProperty(obj, 'x', {
+  value: 42,
+  writable: false,
+  enumerable: false
+});
+obj.x = 100;
+console.log(obj.x);
+console.log(Object.keys(obj));
+```
+**Output:**
+```
+42
+[]
+```
+**Explanation:** Non-writable property can't be changed; non-enumerable hidden from keys.
+
+---
+
+### Q50: Reflect API
+```javascript
+const obj = { x: 1, y: 2 };
+console.log(Reflect.has(obj, 'x'));
+console.log(Reflect.get(obj, 'x'));
+Reflect.set(obj, 'z', 3);
+console.log(obj);
+```
+**Output:**
+```
+true
+1
+{ x: 1, y: 2, z: 3 }
+```
+**Explanation:** Reflect provides methods for object operations as functions.
+
+---
+
+## Part 3: Arrays & Async (Q51-75)
+
+### Q51: Array Flat with Depth
+```javascript
+const arr = [1, [2, [3, [4, [5]]]]];
+console.log(arr.flat());
+console.log(arr.flat(2));
+console.log(arr.flat(Infinity));
+```
+**Output:**
+```
+[1, 2, [3, [4, [5]]]]
+[1, 2, 3, [4, [5]]]
+[1, 2, 3, 4, 5]
+```
+**Explanation:** `flat()` flattens one level by default; depth parameter controls levels.
+
+---
+
+### Q52: Array Fill Reference
+```javascript
+const arr = new Array(3).fill([]);
+arr[0].push(1);
+console.log(arr);
+```
+**Output:** `[[1], [1], [1]]`
+
+**Explanation:** `fill()` uses same reference for all elements.
+
+---
+
+### Q53: Array Sort Default
+```javascript
+const arr = [1, 5, 10, 20, 3];
+arr.sort();
+console.log(arr);
+```
+**Output:** `[1, 10, 20, 3, 5]`
+
+**Explanation:** Default sort converts to strings, uses lexicographic order.
+
+---
+
+### Q54: Array Reduce Without Initial
+```javascript
+const arr = [1, 2, 3, 4];
+const sum = arr.reduce((acc, val) => acc + val);
+console.log(sum);
+
+const empty = [];
+const result = empty.reduce((acc, val) => acc + val);
+```
+**Output:**
+```
+10
+TypeError: Reduce of empty array with no initial value
+```
+**Explanation:** Without initial value, first element becomes accumulator; empty array throws.
+
+---
+
+### Q55: Array Includes vs IndexOf with NaN
+```javascript
+const arr = [1, 2, NaN, 4];
+console.log(arr.includes(NaN));
+console.log(arr.indexOf(NaN));
+```
+**Output:**
+```
+true
+-1
+```
+**Explanation:** `includes()` uses SameValueZero (finds NaN); `indexOf()` uses strict equality.
+
+---
+
+### Q56: Sparse Array Iteration
+```javascript
+const arr = [1, , 3];
+console.log(arr.map(x => x * 2));
+console.log(arr.filter(x => true));
+```
+**Output:**
+```
+[2, empty, 6]
+[1, 3]
+```
+**Explanation:** `map()` preserves holes; `filter()` removes them.
+
+---
+
+### Q57: Array At Method
+```javascript
+const arr = [1, 2, 3, 4, 5];
+console.log(arr.at(0));
+console.log(arr.at(-1));
+console.log(arr.at(10));
+```
+**Output:**
+```
+1
+5
+undefined
+```
+**Explanation:** `at()` supports negative indices; returns undefined for out of bounds.
+
+---
+
+### Q58: Promise Execution Order
+```javascript
+console.log('1');
+Promise.resolve().then(() => console.log('2'));
+console.log('3');
+```
+**Output:**
+```
+1
+3
+2
+```
+**Explanation:** Promise callbacks are microtasks, executed after current script.
+
+---
+
+### Q59: Async Function Return
+```javascript
+async function test() {
+  return 42;
+}
+const result = test();
+console.log(result);
+result.then(console.log);
+```
+**Output:**
+```
+Promise { <pending> }
+42
+```
+**Explanation:** Async functions always return promises.
+
+---
+
+### Q60: Promise Chain Missing Return
+```javascript
+Promise.resolve(1)
+  .then(x => x + 1)
+  .then(x => { x + 1 })
+  .then(console.log);
+```
+**Output:** `undefined`
+
+**Explanation:** Second `then` doesn't return value (implicit `undefined`).
+
+---
+
+### Q61: Promise.all() Rejection
+```javascript
+Promise.all([
+  Promise.resolve(1),
+  Promise.reject('error'),
+  Promise.resolve(3)
+]).then(console.log).catch(console.log);
+```
+**Output:** `error`
+
+**Explanation:** `Promise.all()` rejects immediately if any promise rejects.
+
+---
+
+### Q62: Async/Await Error Handling
+```javascript
+async function test() {
+  await Promise.reject('error');
+  console.log('after');
+}
+test().catch(console.log);
+console.log('sync');
+```
+**Output:**
+```
+sync
+error
+```
+**Explanation:** Rejected promise throws in async function; 'after' never executes.
+
+---
+
+### Q63: SetTimeout vs Promise
+```javascript
+setTimeout(() => console.log('1'), 0);
+Promise.resolve().then(() => console.log('2'));
+console.log('3');
+```
+**Output:**
+```
+3
+2
+1
+```
+**Explanation:** Microtasks (promises) execute before macrotasks (setTimeout).
+
+---
+
+### Q64: Promise Constructor Execution
+```javascript
+const promise = new Promise((resolve) => {
+  console.log('1');
+  resolve('2');
+  console.log('3');
+});
+promise.then(console.log);
+console.log('4');
+```
+**Output:**
+```
+1
+3
+4
+2
+```
+**Explanation:** Promise executor runs synchronously; `then` callback is async.
+
+---
+
+### Q65: Promise.race()
+```javascript
+Promise.race([
+  new Promise(resolve => setTimeout(() => resolve('slow'), 100)),
+  new Promise(resolve => setTimeout(() => resolve('fast'), 50))
+]).then(console.log);
+```
+**Output:** `fast`
+
+**Explanation:** `Promise.race()` resolves with first settled promise.
+
+---
+
+### Q66: Multiple Awaits Sequential
+```javascript
+async function test() {
+  console.log('start');
+  const a = await Promise.resolve(1);
+  console.log('middle');
+  const b = await Promise.resolve(2);
+  console.log('end');
+  return a + b;
+}
+test().then(console.log);
+console.log('sync');
+```
+**Output:**
+```
+start
+sync
+middle
+end
+3
+```
+**Explanation:** Each await pauses execution; code after becomes microtask.
+
+---
+
+### Q67: Promise Finally
+```javascript
+Promise.resolve('success')
+  .finally(() => {
+    console.log('finally');
+    return 'ignored';
+  })
+  .then(console.log);
+```
+**Output:**
+```
+finally
+success
+```
+**Explanation:** `finally()` runs regardless of outcome, doesn't modify value.
+
+---
+
+### Q68: Promise.allSettled()
+```javascript
+Promise.allSettled([
+  Promise.resolve(1),
+  Promise.reject('error'),
+  Promise.resolve(3)
+]).then(results => {
+  console.log(results.length);
+  console.log(results[1].status);
+});
+```
+**Output:**
+```
+3
+rejected
+```
+**Explanation:** `allSettled()` waits for all promises, never rejects.
+
+---
+
+### Q69: Async IIFE
+```javascript
+(async () => {
+  console.log('1');
+  await Promise.resolve();
+  console.log('2');
+})();
+console.log('3');
+```
+**Output:**
+```
+1
+3
+2
+```
+**Explanation:** Async IIFE; code after await is microtask.
+
+---
+
+### Q70: Await Non-Promise
+```javascript
+async function test() {
+  const result = await 42;
+  console.log(result);
+  return result;
+}
+test().then(console.log);
+```
+**Output:**
+```
+42
+42
+```
+**Explanation:** Awaiting non-promise wraps it in resolved promise.
+
+---
+
+### Q71: Promise Then Return Promise
+```javascript
+Promise.resolve(1)
+  .then(x => Promise.resolve(x + 1))
+  .then(x => Promise.resolve(x + 1))
+  .then(console.log);
+```
+**Output:** `3`
+
+**Explanation:** Returning promise from `then` unwraps it automatically.
+
+---
+
+### Q72: Parallel vs Sequential Promises
+```javascript
+async function sequential() {
+  const a = await Promise.resolve(1);
+  const b = await Promise.resolve(2);
+  return a + b;
+}
+
+async function parallel() {
+  const [a, b] = await Promise.all([
+    Promise.resolve(1),
+    Promise.resolve(2)
+  ]);
+  return a + b;
+}
+
+sequential().then(console.log);
+parallel().then(console.log);
+```
+**Output:**
+```
+3
+3
+```
+**Explanation:** Both work, but parallel is faster for independent promises.
+
+---
+
+### Q73: Promise Executor Error
+```javascript
+new Promise((resolve, reject) => {
+  throw new Error('error');
+}).catch(e => console.log(e.message));
+```
+**Output:** `error`
+
+**Explanation:** Errors in executor automatically reject promise.
+
+---
+
+### Q74: Array FlatMap
+```javascript
+const arr = [1, 2, 3];
+const result = arr.flatMap(x => [x, x * 2]);
+console.log(result);
+```
+**Output:** `[1, 2, 2, 4, 3, 6]`
+
+**Explanation:** `flatMap()` maps then flattens one level.
+
+---
+
+### Q75: Array From with Mapping
+```javascript
+const arr = Array.from({ length: 5 }, (_, i) => i * 2);
+console.log(arr);
+```
+**Output:** `[0, 2, 4, 6, 8]`
+
+**Explanation:** `Array.from()` with mapping function creates array from iterable.
+
+---
+
+## Part 4: Advanced & Tricky (Q76-100)
+
+### Q76: Type Coercion Addition
+```javascript
+console.log([] + []);
+console.log([] + {});
+console.log({} + []);
+console.log(true + false);
+console.log('5' + 3);
+console.log('5' - 3);
+```
+**Output:**
+```
+""
+"[object Object]"
+"[object Object]"
+1
+"53"
+2
+```
+**Explanation:** `+` converts to strings; `-` converts to numbers.
+
+---
+
+### Q77: Equality Comparisons
+```javascript
+console.log(0 == false);
+console.log(0 === false);
+console.log('' == false);
+console.log(null == undefined);
+console.log(null === undefined);
+```
+**Output:**
+```
+true
+false
+true
+true
+false
+```
+**Explanation:** `==` does type coercion; `===` doesn't.
+
+---
+
+### Q78: NaN Comparisons
+```javascript
+console.log(NaN === NaN);
+console.log(NaN == NaN);
+console.log(Object.is(NaN, NaN));
+console.log(Number.isNaN(NaN));
+console.log(isNaN('hello'));
+```
+**Output:**
+```
+false
+false
+true
+true
+true
+```
+**Explanation:** NaN never equals itself; `Object.is()` and `Number.isNaN()` handle it correctly.
+
+---
+
+### Q79: Implicit Type Conversion
+```javascript
+console.log(+'42');
+console.log(+true);
+console.log(+false);
+console.log(+null);
+console.log(+undefined);
+console.log(+'hello');
+```
+**Output:**
+```
+42
+1
+0
+0
+NaN
+NaN
+```
+**Explanation:** Unary `+` converts to number.
+
+---
+
+### Q80: Logical Operators Short Circuit
+```javascript
+console.log(true || console.log('not executed'));
+console.log(false && console.log('not executed'));
+console.log(null ?? console.log('executed'));
+```
+**Output:** `executed`
+
+**Explanation:** `||` and `&&` short-circuit; `??` only checks null/undefined.
+
+---
+
+### Q81: Comma Operator
+```javascript
+let x = (1, 2, 3);
+console.log(x);
+
+let y = (console.log('a'), console.log('b'), 42);
+console.log(y);
+```
+**Output:**
+```
+3
+a
+b
+42
+```
+**Explanation:** Comma operator evaluates all, returns last.
+
+---
+
+### Q82: Void Operator
+```javascript
+console.log(void 0);
+console.log(void (1 + 1));
+console.log(void console.log('hello'));
+```
+**Output:**
+```
+undefined
+hello
+undefined
+```
+**Explanation:** `void` evaluates expression, always returns undefined.
+
+---
+
+### Q83: Delete Operator
+```javascript
+const obj = { a: 1, b: 2 };
+console.log(delete obj.a);
+console.log(obj);
+
+let x = 5;
+console.log(delete x);
+console.log(x);
+```
+**Output:**
+```
+true
+{ b: 2 }
+false
+5
+```
+**Explanation:** `delete` removes object properties but not variables.
+
+---
+
+### Q84: In Operator
+```javascript
+const obj = { a: 1 };
+console.log('a' in obj);
+console.log('toString' in obj);
+console.log('b' in obj);
+```
+**Output:**
+```
+true
+true
+false
+```
+**Explanation:** `in` checks own and inherited properties.
+
+---
+
+### Q85: Instanceof with Primitives
+```javascript
+console.log('hello' instanceof String);
+console.log(new String('hello') instanceof String);
+console.log(42 instanceof Number);
+```
+**Output:**
+```
+false
+true
+false
+```
+**Explanation:** `instanceof` checks object instances, not primitives.
+
+---
+
+### Q86: Typeof Null
+```javascript
+console.log(typeof null);
+console.log(typeof undefined);
+console.log(typeof []);
+console.log(typeof {});
+console.log(typeof function(){});
+```
+**Output:**
+```
+object
+undefined
+object
+object
+function
+```
+**Explanation:** `typeof null` is 'object' (historical bug); arrays are objects.
+
+---
+
+### Q87: String Template Literal Tag
+```javascript
+function tag(strings, ...values) {
+  console.log(strings);
+  console.log(values);
+}
+const name = 'Alice';
+const age = 30;
+tag`Hello ${name}, you are ${age} years old`;
+```
+**Output:**
+```
+['Hello ', ', you are ', ' years old']
+['Alice', 30]
+```
+**Explanation:** Tagged templates pass strings and interpolated values separately.
+
+---
+
+### Q88: Generator Function
+```javascript
+function* gen() {
+  yield 1;
+  yield 2;
+  yield 3;
+}
+const iterator = gen();
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+console.log(iterator.next());
+```
+**Output:**
+```
+{ value: 1, done: false }
+{ value: 2, done: false }
+{ value: 3, done: false }
+{ value: undefined, done: true }
+```
+**Explanation:** Generators yield values one at a time.
+
+---
+
+### Q89: Destructuring Swap
+```javascript
+let a = 1, b = 2;
+[a, b] = [b, a];
+console.log(a, b);
+```
+**Output:** `2 1`
+
+**Explanation:** Array destructuring enables elegant variable swapping.
+
+---
+
+### Q90: Default Parameters Side Effects
+```javascript
+let count = 0;
+function increment() {
+  return ++count;
+}
+function test(x = increment()) {
+  console.log(x);
+}
+test();
+test();
+test(10);
+test();
+```
+**Output:**
+```
+1
+2
+10
+3
+```
+**Explanation:** Default parameter evaluated each time function called without argument.
+
+---
+
+### Q91: Rest Parameter Position
+```javascript
+function test(a, ...rest, b) {
+  console.log(a, rest, b);
+}
+test(1, 2, 3, 4);
+```
+**Output:** `SyntaxError: Rest parameter must be last formal parameter`
+
+**Explanation:** Rest parameter must be last in parameter list.
+
+---
+
+### Q92: Array Destructuring Skip
+```javascript
+const [a, , , b] = [1, 2, 3, 4, 5];
+console.log(a, b);
+```
+**Output:** `1 4`
+
+**Explanation:** Commas skip elements in array destructuring.
+
+---
+
+### Q93: Object Method This Binding
+```javascript
+const obj = {
+  name: 'Test',
+  getName() {
+    return this.name;
+  }
+};
+const { getName } = obj;
+console.log(getName());
+```
+**Output:** `undefined`
+
+**Explanation:** Destructured method loses `this` binding.
+
+---
+
+### Q94: Spread with Strings
+```javascript
+const str = 'hello';
+console.log([...str]);
+console.log({ ...str });
+```
+**Output:**
+```
+['h', 'e', 'l', 'l', 'o']
+{ '0': 'h', '1': 'e', '2': 'l', '3': 'l', '4': 'o' }
+```
+**Explanation:** Spread converts string to array or object with numeric keys.
+
+---
+
+### Q95: Number Methods
+```javascript
+console.log(Number.isInteger(42));
+console.log(Number.isInteger(42.0));
+console.log(Number.isInteger(42.1));
+console.log(Number.isSafeInteger(9007199254740991));
+console.log(Number.isSafeInteger(9007199254740992));
+```
+**Output:**
+```
+true
+true
+false
+true
+false
+```
+**Explanation:** JavaScript integers are safe up to 2^53 - 1.
+
+---
+
+### Q96: String Padding
+```javascript
+console.log('5'.padStart(3, '0'));
+console.log('5'.padEnd(3, '0'));
+console.log('hello'.padStart(10));
+```
+**Output:**
+```
+005
+500
+     hello
+```
+**Explanation:** `padStart/padEnd` add characters to reach target length.
+
+---
+
+### Q97: Object Entries and FromEntries
+```javascript
+const obj = { a: 1, b: 2, c: 3 };
+const entries = Object.entries(obj);
+console.log(entries);
+const newObj = Object.fromEntries(entries);
+console.log(newObj);
+```
+**Output:**
+```
+[['a', 1], ['b', 2], ['c', 3]]
+{ a: 1, b: 2, c: 3 }
+```
+**Explanation:** `entries()` converts to array; `fromEntries()` converts back.
+
+---
+
+### Q98: BigInt Operations
+```javascript
+console.log(typeof 123n);
+console.log(123n + 456n);
+console.log(123n === 123);
+console.log(123n == 123);
+```
+**Output:**
+```
+bigint
+579n
+false
+true
+```
+**Explanation:** BigInt is separate type; `==` coerces, `===` doesn't.
+
+---
+
+### Q99: Optional Chaining with Functions
+```javascript
+const obj = {
+  method: () => 'exists'
+};
+console.log(obj.method?.());
+console.log(obj.missing?.());
+console.log(obj.missing());
+```
+**Output:**
+```
+exists
+undefined
+TypeError: obj.missing is not a function
+```
+**Explanation:** Optional chaining with `?.()` safely calls potentially undefined functions.
+
+---
+
+### Q100: Numeric Separators
+```javascript
+const billion = 1_000_000_000;
+const bytes = 0b1111_0000;
+const hex = 0xFF_FF_FF;
+console.log(billion);
+console.log(bytes);
+console.log(hex);
+```
+**Output:**
+```
+1000000000
+240
+16777215
+```
+**Explanation:** Numeric separators improve readability; ignored by JavaScript.
+
+---
+
+## 🎉 Congratulations!
+
+You've completed all 100 advanced JavaScript snippet questions! 
+
+### Next Steps:
+1. **Review weak areas**: Go back to questions you found challenging
+2. **Practice explaining**: Can you explain each output without looking?
+3. **Build projects**: Apply these concepts in the **Frontend Projects** section
+4. **Time yourself**: Practice answering questions quickly (30-60 seconds each)
+5. **Mock interviews**: Practice with friends or colleagues
+
+### Key Patterns Mastered:
+✅ Scope, Hoisting, Closures  
+✅ Objects, Prototypes, This binding  
+✅ Arrays, Iteration, Modern methods  
+✅ Async/Await, Promises, Event Loop  
+✅ Type Coercion, Operators  
+✅ ES6+ Features  
+✅ Edge Cases and Gotchas  
+
+---
+
+## 📚 Additional Practice
+
+- **Basic JS Questions**: Review fundamentals in the "Basic
+
+---
+
+## 💡 Practice Tips
+
+1. **Run the code**: Don't just read - actually execute these snippets
+2. **Modify and experiment**: Change values, add console.logs, break things
+3. **Explain out loud**: Practice explaining the output before checking
+4. **Time yourself**: In interviews, you need to answer quickly
+5. **Focus on "why"**: Understanding the mechanism is more important than memorizing
