@@ -464,67 +464,234 @@ for (let value of gen1()) {
 
 ---
 
-### 14. Write an interface to mock Promise in JavaScript which can be called to create a promise with resolve and reject. Also implement then functionality
+### 14. Write a complete Promise implementation in JavaScript with resolve, reject, then, and catch functionality
 
-- Basic promise interface will allow creation of promise by passing resolver as the argument
-- `resolve` and `reject` methods will have to be passed to the resolver which the user code will ivoke with data once settled
-- `setTimeout` with zero delay can be used to not immediately execute the resolver
-- List of callbacks to `then` to be invoked can be stores in the array of success and failure list
-- Once resolved or rejected, promise cannot change the state
+- A complete Promise implementation includes proper state management, callback queuing, and chaining support
+- The implementation uses `queueMicrotask` to ensure asynchronous execution matching native Promise behavior
+- Supports `.then()` for handling both success and failure, `.catch()` for error handling
+- Handles promise chaining, returning promises from callbacks, and error propagation
+- Once resolved or rejected, the promise state cannot change
 
 ```js copy
-function MyPromise(resolver) {
-  let successList = [];
-  let failureList = [];
-  let resolution = "pending";
-  let data;
-  function resolve(value) {
-    if (resolution === "pending") {
-      for (let successCb of successList) {
-        successCb(value);
-      }
-      resolution = "resolved";
-      data = value;
-    }
-  }
-  function reject(value) {
-    if (resolution === "pending") {
-      for (let failureCb of failureList) {
-        failureCb(value);
-      }
-      resolution = "rejected";
-      data = value;
-    }
-  }
-  setTimeout(() => {
+const STATES = {
+  PENDING: "PENDING",
+  FULFILLED: "FULFILLED",
+  REJECTED: "REJECTED",
+};
+
+class MyPromise {
+  value;
+  state = STATES.PENDING;
+  resolveCbs = [];
+  rejectCbs = [];
+
+  // callback(resolve, reject)
+  constructor(callback) {
+    this.resolve = this._resolve.bind(this);
+    this.reject = this._reject.bind(this);
+
     try {
-      resolver(resolve, reject);
+      callback(this.resolve, this.reject);
     } catch (err) {
-      reject(err);
+      this.reject(err);
     }
-  }, 0);
-  return {
-    status: resolution,
-    then: function (onSuccess, onFailure) {
-      if (resolution === "pending") {
-        successList.push(onSuccess);
-        failureList.push(onFailure);
-      } else {
-        resolution === "resolved" ? onSuccess(data) : onFailure(data);
+  }
+
+  _resolve(value) {
+    queueMicrotask(() => {
+      if (this.state !== STATES.PENDING) return;
+
+      this.value = value;
+      this.state = STATES.FULFILLED;
+      this.runResolveCallbacks();
+    });
+  }
+
+  _reject(err) {
+    queueMicrotask(() => {
+      if (this.state !== STATES.PENDING) return;
+
+      this.value = err;
+      this.state = STATES.REJECTED;
+      this.runRejectCallbacks();
+    });
+  }
+
+  runResolveCallbacks() {
+    if (this.resolveCbs.length) {
+      this.resolveCbs.forEach((handler) => handler(this.value));
+      this.resolveCbs = [];
+    }
+  }
+
+  runRejectCallbacks() {
+    if (this.rejectCbs.length) {
+      this.rejectCbs.forEach((handler) => handler(this.value));
+      this.rejectCbs = [];
+    }
+  }
+
+  then(resolveCallback, rejectCallback) {
+    return new MyPromise((resolve, reject) => {
+      const resolveCallbackHandler = (result) => {
+        if (!resolveCallback) {
+          return resolve(result);
+        }
+
+        try {
+          const output = resolveCallback(result);
+          if (output instanceof MyPromise) {
+            return output.then(resolve, reject);
+          } else {
+            return resolve(output);
+          }
+        } catch (err) {
+          return reject(err);
+        }
+      };
+
+      const rejectCallbackHandler = (result) => {
+        if (!rejectCallback) {
+          return reject(result);
+        }
+
+        try {
+          const output = rejectCallback(result);
+          if (output instanceof MyPromise) {
+            return output.then(resolve, reject);
+          } else {
+            return resolve(output);
+          }
+        } catch (err) {
+          return reject(err);
+        }
+      };
+
+      this.resolveCbs.push(resolveCallbackHandler);
+      this.rejectCbs.push(rejectCallbackHandler);
+
+      if (this.state === STATES.FULFILLED) {
+        queueMicrotask(() => this.runResolveCallbacks());
+      } else if (this.state === STATES.REJECTED) {
+        queueMicrotask(() => this.runRejectCallbacks());
       }
-    },
-  };
+    });
+  }
+
+  // catch((err) => {})
+  catch(rejectCallback) {
+    return this.then(null, rejectCallback);
+  }
 }
+
 // driver code
 let p = new MyPromise((resolve, reject) => {
   resolve(10);
 });
-p.then((data) => console.log(data), console.log);
+p.then((data) => console.log(data)).catch(console.log);
+
+// Example with chaining
+new MyPromise((resolve) => resolve(5))
+  .then((x) => x * 2)
+  .then((x) => x + 3)
+  .then((x) => console.log(x)); // 13
+
+// Example with error handling
+new MyPromise((resolve, reject) => reject("Error"))
+  .catch((err) => console.log("Caught:", err))
+  .then(() => console.log("Continues after catch"));
 ```
 
 **Notes**
 
-ES6 Promise is much more complex and sophesticated than the above shown implementation.
+This implementation includes:
+- Proper state management (PENDING, FULFILLED, REJECTED)
+- Asynchronous execution using `queueMicrotask`
+- Support for promise chaining
+- Error handling and propagation
+- Ability to return promises from `.then()` callbacks
+- `.catch()` method for cleaner error handling
+
+**Test Cases**
+
+Below are comprehensive test cases covering all major use cases:
+
+```js
+// Test utilities
+let testsPassed = 0;
+let testsFailed = 0;
+
+function assert(condition, testName) {
+  if (condition) {
+    console.log(`✓ PASS: ${testName}`);
+    testsPassed++;
+  } else {
+    console.error(`✗ FAIL: ${testName}`);
+    testsFailed++;
+  }
+}
+
+function asyncAssert(promise, testName, validator) {
+  return promise
+    .then((result) => {
+      if (validator(result)) {
+        console.log(`✓ PASS: ${testName}`);
+        testsPassed++;
+      } else {
+        console.error(`✗ FAIL: ${testName} - Unexpected result:`, result);
+        testsFailed++;
+      }
+    })
+    .catch((error) => {
+      console.error(`✗ FAIL: ${testName} - Unexpected error:`, error);
+      testsFailed++;
+    });
+}
+
+// Sample tests
+asyncAssert(
+  new MyPromise((resolve) => resolve(42)),
+  "Basic resolve",
+  (result) => result === 42
+);
+
+asyncAssert(
+  new MyPromise((resolve) => resolve(5)).then((x) => x * 2),
+  "Then transformation",
+  (result) => result === 10
+);
+
+asyncAssert(
+  new MyPromise((resolve) => resolve(2))
+    .then((x) => x + 1)
+    .then((x) => x * 2),
+  "Then chaining",
+  (result) => result === 6
+);
+
+asyncAssert(
+  new MyPromise((resolve, reject) => reject("error")).catch(
+    (err) => "caught: " + err
+  ),
+  "Catch handling",
+  (result) => result === "caught: error"
+);
+
+asyncAssert(
+  new MyPromise((resolve) => resolve(1))
+    .then((x) => {
+      throw new Error("thrown error");
+    })
+    .catch((err) => err.message),
+  "Error propagation",
+  (result) => result === "thrown error"
+);
+
+// Print summary after async tests complete
+setTimeout(() => {
+  console.log(`\nTests: ${testsPassed} passed, ${testsFailed} failed`);
+}, 100);
+```
 
 ---
 
